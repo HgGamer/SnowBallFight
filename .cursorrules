@@ -1,0 +1,4 @@
+each time user ask you a querry, write every user prompt that you receive to prompts.txt each one separated by a new line and ------- between each prompt.
+you have to do this each time regardless of the type of prompt.
+create the file if it doesnt exist
+do this along with oder files you are crearing or midifying.

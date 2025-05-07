@@ -1,0 +1,58 @@
+implement a camera movement where the camera follows the player (transform) keep the rotation of the camera
+-------
+
+implement a basic WASD movement, dont need to use gravity, separate the input and movement, movement should be a function with Vector2 paramenter and move based on that
+-------
+
+add player and camera rotation when right mouse button is pressed and we move the mouse horisontally rorate camera  and player on Y axis
+-------
+
+only the player moves, rotate the camera as well
+-------
+
+rotate the camera based on player faceing direction do not user the mouse input
+-------
+
+movement should be related to facing direction
+-------
+
+\Lib.cs(126,12): error CS1061: 'Local' does not contain a definition for 'Puppet' and no accessible extension method 'Puppet' accepting a first argument of type 'Local' could be found (are
+ you missing a using directive or an assembly reference?)
+------- 
+For the code present, we get this error:
+```
+The type or namespace name 'CinemachineCamera' could not be found (are you missing a using directive or an assembly reference?)
+```
+How can I resolve this? If you propose a fix, please make it concise.
+-------
+call this but on main thread
+-------
+can i call it in the next frame?
+-------
+
+Move function should return the move vector in worldspace
+-------
+
+transform.position assign attempt for 'Puppet - 1' is not valid. Input position is { NaN, NaN, 0.000000 }.
+-------
+
+the lerp is good but when it changes from 360 it rotates in the wrong direction
+-------
+
+camera movement should be lerped as well
+-------
+
+create snowball
+-------
+
+why is my snowball is not moving?
+-------
+
+can you explain this part?
+-------
+
+calculate direction vector from  player.rotation;
+-------
+
+calculate distance from 0,0 and if its larger than 100 delete entinty
+-------
