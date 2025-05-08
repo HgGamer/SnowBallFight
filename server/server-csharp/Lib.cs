@@ -182,11 +182,15 @@ public static partial class Module
                 continue;
             }
 
-
-
-           
             var new_pos = puppet_entity.position + direction * movespeed;
            
+            // Check if new position magnitude exceeds 20, if so clamp it
+            if (new_pos.Magnitude > 40)
+            {
+                // Scale the position vector to have magnitude of 20
+                new_pos = new_pos.Normalized * 40;
+            }
+            
             puppet_entity.position.x = new_pos.x;
             puppet_entity.position.y = new_pos.y;
 

@@ -56,3 +56,6 @@ calculate direction vector from  player.rotation;
 
 calculate distance from 0,0 and if its larger than 100 delete entinty
 -------
+
+if player next position magnitude would be over 20 round it down so its under 20
+-------
