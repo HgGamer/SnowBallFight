@@ -437,6 +437,7 @@ namespace SpacetimeDB.Types
             return update.ReducerCall.ReducerName switch
             {
                 "Connect" => BSATNHelpers.Decode<Reducer.Connect>(encodedArgs),
+                "CraftSnowBall" => BSATNHelpers.Decode<Reducer.CraftSnowBall>(encodedArgs),
                 "Disconnect" => BSATNHelpers.Decode<Reducer.Disconnect>(encodedArgs),
                 "EnterGame" => BSATNHelpers.Decode<Reducer.EnterGame>(encodedArgs),
                 "MoveAllPlayers" => BSATNHelpers.Decode<Reducer.MoveAllPlayers>(encodedArgs),
@@ -465,6 +466,7 @@ namespace SpacetimeDB.Types
             return reducer switch
             {
                 Reducer.Connect args => Reducers.InvokeConnect(eventContext, args),
+                Reducer.CraftSnowBall args => Reducers.InvokeCraftSnowBall(eventContext, args),
                 Reducer.Disconnect args => Reducers.InvokeDisconnect(eventContext, args),
                 Reducer.EnterGame args => Reducers.InvokeEnterGame(eventContext, args),
                 Reducer.MoveAllPlayers args => Reducers.InvokeMoveAllPlayers(eventContext, args),

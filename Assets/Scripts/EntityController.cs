@@ -35,7 +35,7 @@ public class EntityController  : MonoBehaviour
 
 	public virtual void OnEntityUpdated(Entity newVal)
 	{
-		Debug.Log($"OnEntityUpdated  {newVal.Position.X} , {newVal.Position.Y} , {transform.name}");
+		
 		LerpTime = 0.0f;
 		LerpStartPosition = transform.position;
 		

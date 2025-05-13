@@ -23,13 +23,19 @@ namespace SpacetimeDB.Types
         public float Speed;
         [DataMember(Name = "lastHitTime")]
         public SpacetimeDB.Timestamp LastHitTime;
+        [DataMember(Name = "current_states")]
+        public System.Collections.Generic.List<PlayerActions> CurrentStates;
+        [DataMember(Name = "has_snowball")]
+        public bool HasSnowball;
 
         public Puppet(
             uint EntityId,
             uint PlayerId,
             DbVector2 Direction,
             float Speed,
-            SpacetimeDB.Timestamp LastHitTime
+            SpacetimeDB.Timestamp LastHitTime,
+            System.Collections.Generic.List<PlayerActions> CurrentStates,
+            bool HasSnowball
         )
         {
             this.EntityId = EntityId;
@@ -37,11 +43,14 @@ namespace SpacetimeDB.Types
             this.Direction = Direction;
             this.Speed = Speed;
             this.LastHitTime = LastHitTime;
+            this.CurrentStates = CurrentStates;
+            this.HasSnowball = HasSnowball;
         }
 
         public Puppet()
         {
             this.Direction = new();
+            this.CurrentStates = new();
         }
     }
 }

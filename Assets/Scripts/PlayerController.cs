@@ -87,8 +87,13 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0)) // Left mouse button
         {
-            var from =  OwnedPuppets[0].transform.position;
-            GameManager.SpawnSnowBall(PlayerId, new Vector2(from.x, from.z));
+            if(!OwnedPuppets[0].Puppet.HasSnowball){
+                GameManager.CraftSnowBall(PlayerId);
+            }else{
+                var from =  OwnedPuppets[0].transform.position;
+                GameManager.SpawnSnowBall(PlayerId, new Vector2(from.x, from.z));
+            }
+           
         }
         LockInputPosition = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 

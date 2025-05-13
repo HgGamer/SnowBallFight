@@ -1,7 +1,16 @@
 using SpacetimeDB;
 
 public static partial class Module
-{
+{ 
+    
+    [SpacetimeDB.Type]
+    public enum PlayerActions{
+        Throw,
+        Hit,
+        Craft,
+        Standup,
+    }
+  
 
     // We're using this table as a singleton, so in this table
     // there will only be one element where the `id` is 0.
@@ -42,6 +51,8 @@ public static partial class Module
         public DbVector2 direction;
         public float speed;
         public SpacetimeDB.Timestamp lastHitTime;
+        public List<PlayerActions> current_states;
+        public bool has_snowball;
     }
     [Table(Name = "snowball", Public = true)]
     public partial struct SnowBall
@@ -277,14 +288,42 @@ public static partial class Module
             direction = new DbVector2(0, 1),
             speed = 0f,
             lastHitTime = timestamp,
+            has_snowball = true,
+            current_states = new List<PlayerActions>()
         });
         return entity;
     }
-     [Reducer]
+
+    static void AddState(ReducerContext ctx,uint player_id, PlayerActions state){
+        var player = ctx.Db.player.player_id.Find(player_id) ?? throw new Exception("Player not found");
+     
+        var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
+        puppet.current_states.Add(state);
+        ctx.Db.puppet.entity_id.Update(puppet);
+        ctx.Db.player.identity.Update(player);
+    }
+
+    [Reducer]
     public static void ThrowSnowBall(ReducerContext ctx,uint player_id, DbVector2 position)
     {
-        SpawnSnowBall(ctx, player_id, position, ctx.Timestamp);
+        var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
+       
+        if(puppet.has_snowball){
+            SpawnSnowBall(ctx, player_id, position, ctx.Timestamp);
+            AddState(ctx, player_id, PlayerActions.Throw);
+        }
+
     }
+    [Reducer]
+    public static void CraftSnowBall(ReducerContext ctx,uint player_id)
+    {
+        var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
+        puppet.has_snowball = true;
+        ctx.Db.puppet.entity_id.Update(puppet);
+        AddState(ctx, player_id, PlayerActions.Craft);
+    }
+
+
 
     public static Entity SpawnSnowBall(ReducerContext ctx, uint player_id, DbVector2 position, SpacetimeDB.Timestamp timestamp)
     {
@@ -295,7 +334,10 @@ public static partial class Module
          
         // Find the puppet to get facing direction based on rotation
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
-     
+       
+        puppet.has_snowball = false;
+        ctx.Db.puppet.entity_id.Update(puppet);
+        
         // Get the puppet's entity to access rotation
         var puppetEntity = ctx.Db.entity.entity_id.Find(puppet.entity_id) ?? throw new Exception("Puppet entity not found");
         

@@ -18,6 +18,7 @@ public class PrefabManager : MonoBehaviour
 
     public static PuppetController SpawnPuppet(Puppet puppet, PlayerController owner)
 	{
+		Debug.Log($"SpawnPuppet: {puppet.EntityId}");
 		var entityController = Instantiate(Instance.PuppetPrefab);
 		entityController.name = $"Puppet - {puppet.EntityId}";
 		entityController.Spawn(puppet, owner);
@@ -27,6 +28,7 @@ public class PrefabManager : MonoBehaviour
 
     public static PlayerController SpawnPlayer(Player player)
 	{
+		Debug.Log($"SpawnPlayer: {player.Identity}");
 		var playerController = Instantiate(Instance.PlayerPrefab);
 		playerController.name = $"PlayerController - {player.Name}";
 		playerController.Initialize(player);

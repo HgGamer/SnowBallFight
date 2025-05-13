@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
         LocalIdentity = identity;
 
         conn.Db.Puppet.OnInsert += PuppetOnInsert;
+        conn.Db.Puppet.OnUpdate += PuppetOnUpdate;
         conn.Db.Entity.OnUpdate += EntityOnUpdate;
         
         conn.Db.Entity.OnDelete += EntityOnDelete;
@@ -121,6 +122,12 @@ public class GameManager : MonoBehaviour
         var entityController = PrefabManager.SpawnPuppet(insertedValue, player);
         Entities.Add(insertedValue.EntityId, entityController);
     }
+   private static void PuppetOnUpdate(EventContext context, Puppet oldValue, Puppet newValue){
+       //find the puppet in the entities dictionary
+       if(Entities.TryGetValue(newValue.EntityId, out var entityController)){
+           ((PuppetController)entityController).OnEntityUpdated(newValue);
+       }
+   }
     private static void EntityOnUpdate(EventContext context, Entity oldEntity, Entity newEntity)
     {
         if (!Entities.TryGetValue(newEntity.EntityId, out var entityController))
@@ -159,7 +166,11 @@ public class GameManager : MonoBehaviour
         return playerController;
     }
     public static void SpawnSnowBall(uint playerId, DbVector2 position){
-      
+       Debug.Log($"SpawnSnowBall: {playerId}, {position}");
        Conn.Reducers.ThrowSnowBall(playerId, position);
+    }
+
+    public static void CraftSnowBall(uint playerId){
+          Conn.Reducers.CraftSnowBall(playerId);
     }
 }

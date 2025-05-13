@@ -59,3 +59,8 @@ calculate distance from 0,0 and if its larger than 100 delete entinty
 
 if player next position magnitude would be over 20 round it down so its under 20
 -------
+
+spawn wall prefabs from center a given distance , and given number of them equaly arranged around the circle each faceing the circle center
+-------
+
+
