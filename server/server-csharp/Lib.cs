@@ -53,6 +53,7 @@ public static partial class Module
         public SpacetimeDB.Timestamp lastHitTime;
         public List<PlayerActions> current_states;
         public bool has_snowball;
+        public SpacetimeDB.Timestamp locked_until;
     }
     [Table(Name = "snowball", Public = true)]
     public partial struct SnowBall
@@ -179,6 +180,13 @@ public static partial class Module
         // Handle player input
         foreach (var puppet in ctx.Db.puppet.Iter())
         {
+            ClearStates(ctx, puppet);
+            if(puppet.locked_until > ctx.Timestamp){
+                var pup = puppet;
+                pup.speed = 0;
+                ctx.Db.puppet.entity_id.Update(pup);
+                continue;
+            }
             var check_entity = ctx.Db.entity.entity_id.Find(puppet.entity_id);
             if (check_entity == null)
             {
@@ -206,7 +214,9 @@ public static partial class Module
             puppet_entity.position.y = new_pos.y;
 
             ctx.Db.entity.entity_id.Update(puppet_entity);
+           
         }
+      
     }
 
 
@@ -293,7 +303,11 @@ public static partial class Module
         });
         return entity;
     }
-
+    static void ClearStates(ReducerContext ctx, Puppet puppet){
+        
+        puppet.current_states.Clear();
+        ctx.Db.puppet.entity_id.Update(puppet);
+    }
     static void AddState(ReducerContext ctx,uint player_id, PlayerActions state){
         var player = ctx.Db.player.player_id.Find(player_id) ?? throw new Exception("Player not found");
      
@@ -311,6 +325,9 @@ public static partial class Module
         if(puppet.has_snowball){
             SpawnSnowBall(ctx, player_id, position, ctx.Timestamp);
             AddState(ctx, player_id, PlayerActions.Throw);
+            puppet.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(1000);
+
+            ctx.Db.puppet.entity_id.Update(puppet);
         }
 
     }
@@ -321,6 +338,8 @@ public static partial class Module
         puppet.has_snowball = true;
         ctx.Db.puppet.entity_id.Update(puppet);
         AddState(ctx, player_id, PlayerActions.Craft);
+        puppet.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(1000);
+        ctx.Db.puppet.entity_id.Update(puppet);
     }
 
 

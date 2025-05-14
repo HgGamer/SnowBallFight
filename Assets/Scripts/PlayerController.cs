@@ -73,6 +73,7 @@ public class PlayerController : MonoBehaviour
         //GUI.Label(new Rect(0, 0, 100, 50), $"Total Mass: {TotalMass()}");
     }
     // Update is called once per frame
+    
     void Update()
     {
         if (!IsLocalPlayer || NumberOfOwnedPuppet == 0)
@@ -88,9 +89,11 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) // Left mouse button
         {
             if(!OwnedPuppets[0].Puppet.HasSnowball){
+                Debug.Log($"PlayerController: OnMouseDown: {PlayerId} , Crafting snowball");
                 GameManager.CraftSnowBall(PlayerId);
             }else{
                 var from =  OwnedPuppets[0].transform.position;
+                Debug.Log($"PlayerController: OnMouseDown: {PlayerId} , Spawning snowball from {from}");
                 GameManager.SpawnSnowBall(PlayerId, new Vector2(from.x, from.z));
             }
            

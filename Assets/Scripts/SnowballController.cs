@@ -24,7 +24,7 @@ public class SnowBallController : EntityController
 
     public override void OnEntityUpdated(Entity newVal)
 	{
-		Debug.Log($"OnEntityUpdated  {newVal.Position.X} , {newVal.Position.Y} , {transform.name}");
+//		Debug.Log($"OnEntityUpdated  {newVal.Position.X} , {newVal.Position.Y} , {transform.name}");
 		LerpTime = 0.0f;
 		LerpStartPosition = transform.position;
 		

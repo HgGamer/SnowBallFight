@@ -51,6 +51,9 @@ public class GameManager : MonoBehaviour
         Debug.Log("Connected.");
         AuthToken.SaveToken(token);
         LocalIdentity = identity;
+    
+
+
 
         conn.Db.Puppet.OnInsert += PuppetOnInsert;
         conn.Db.Puppet.OnUpdate += PuppetOnUpdate;
@@ -127,6 +130,8 @@ public class GameManager : MonoBehaviour
        if(Entities.TryGetValue(newValue.EntityId, out var entityController)){
            ((PuppetController)entityController).OnEntityUpdated(newValue);
        }
+    
+       
    }
     private static void EntityOnUpdate(EventContext context, Entity oldEntity, Entity newEntity)
     {
