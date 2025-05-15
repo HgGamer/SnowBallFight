@@ -180,7 +180,7 @@ public static partial class Module
         // Handle player input
         foreach (var puppet in ctx.Db.puppet.Iter())
         {
-            ClearStates(ctx, puppet);
+           
             if(puppet.locked_until > ctx.Timestamp){
                 var pup = puppet;
                 pup.speed = 0;
@@ -215,6 +215,10 @@ public static partial class Module
 
             ctx.Db.entity.entity_id.Update(puppet_entity);
            
+        }
+        foreach (var puppet in ctx.Db.puppet.Iter())
+        {
+            ClearStates(ctx, puppet);
         }
       
     }
@@ -309,37 +313,57 @@ public static partial class Module
         ctx.Db.puppet.entity_id.Update(puppet);
     }
     static void AddState(ReducerContext ctx,uint player_id, PlayerActions state){
-        var player = ctx.Db.player.player_id.Find(player_id) ?? throw new Exception("Player not found");
-     
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
         puppet.current_states.Add(state);
         ctx.Db.puppet.entity_id.Update(puppet);
-        ctx.Db.player.identity.Update(player);
+    }
+
+    [Table(Name = "delayed_snowball", Scheduled = nameof(SpawnDelayedSnowball), ScheduledAt = nameof(scheduled_at))]
+    public partial struct DelayedSnowball
+    {
+        [PrimaryKey, AutoInc]
+        public ulong id;
+        public ScheduleAt scheduled_at;
+        public uint player_id;
+        public DbVector2 position;
     }
 
     [Reducer]
-    public static void ThrowSnowBall(ReducerContext ctx,uint player_id, DbVector2 position)
+    public static void SpawnDelayedSnowball(ReducerContext ctx, DelayedSnowball delayed)
+    {
+        SpawnSnowBall(ctx, delayed.player_id, delayed.position, ctx.Timestamp);
+        Log.Info($"Spawned delayed snowball for player {delayed.player_id}");
+    }
+
+    [Reducer]
+    public static void ThrowSnowBall(ReducerContext ctx, uint player_id, DbVector2 position)
     {
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
        
         if(puppet.has_snowball){
-            SpawnSnowBall(ctx, player_id, position, ctx.Timestamp);
-            AddState(ctx, player_id, PlayerActions.Throw);
+            // Schedule snowball to spawn after 1 second
+            ctx.Db.delayed_snowball.Insert(new DelayedSnowball
+            {
+                player_id = player_id,
+                position = position,
+                scheduled_at = new ScheduleAt.Time(ctx.Timestamp + TimeSpan.FromMilliseconds(1000))
+            });
+            
+            puppet.has_snowball = false;
             puppet.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(1000);
-
             ctx.Db.puppet.entity_id.Update(puppet);
+            AddState(ctx, player_id, PlayerActions.Throw);
         }
-
     }
+    
     [Reducer]
     public static void CraftSnowBall(ReducerContext ctx,uint player_id)
     {
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
         puppet.has_snowball = true;
-        ctx.Db.puppet.entity_id.Update(puppet);
-        AddState(ctx, player_id, PlayerActions.Craft);
         puppet.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(1000);
         ctx.Db.puppet.entity_id.Update(puppet);
+        AddState(ctx, player_id, PlayerActions.Craft);
     }
 
 

@@ -66,4 +66,10 @@ spawn wall prefabs from center a given distance , and given number of them equal
 implement 
 -------
 
+okay schedule snowball spawning after 1sec instead of instantly calling spawn snowball, replace the    Task.Delay call with itu
+-------
+
+okay schedule snowball spawning after 1sec instead of instantly calling spawn snowball, replace the  call
+-------
+
 
