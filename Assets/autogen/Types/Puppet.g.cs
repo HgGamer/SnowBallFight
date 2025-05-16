@@ -27,6 +27,8 @@ namespace SpacetimeDB.Types
         public System.Collections.Generic.List<PlayerActions> CurrentStates;
         [DataMember(Name = "has_snowball")]
         public bool HasSnowball;
+        [DataMember(Name = "locked_until")]
+        public SpacetimeDB.Timestamp LockedUntil;
 
         public Puppet(
             uint EntityId,
@@ -35,7 +37,8 @@ namespace SpacetimeDB.Types
             float Speed,
             SpacetimeDB.Timestamp LastHitTime,
             System.Collections.Generic.List<PlayerActions> CurrentStates,
-            bool HasSnowball
+            bool HasSnowball,
+            SpacetimeDB.Timestamp LockedUntil
         )
         {
             this.EntityId = EntityId;
@@ -45,6 +48,7 @@ namespace SpacetimeDB.Types
             this.LastHitTime = LastHitTime;
             this.CurrentStates = CurrentStates;
             this.HasSnowball = HasSnowball;
+            this.LockedUntil = LockedUntil;
         }
 
         public Puppet()

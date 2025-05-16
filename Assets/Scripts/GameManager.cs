@@ -51,14 +51,14 @@ public class GameManager : MonoBehaviour
         Debug.Log("Connected.");
         AuthToken.SaveToken(token);
         LocalIdentity = identity;
-    
+
 
 
 
         conn.Db.Puppet.OnInsert += PuppetOnInsert;
         conn.Db.Puppet.OnUpdate += PuppetOnUpdate;
         conn.Db.Entity.OnUpdate += EntityOnUpdate;
-        
+
         conn.Db.Entity.OnDelete += EntityOnDelete;
         conn.Db.Player.OnInsert += PlayerOnInsert;
         conn.Db.Player.OnDelete += PlayerOnDelete;
@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
         Conn.SubscriptionBuilder()
             .OnApplied(HandleSubscriptionApplied)
             .SubscribeToAllTables();
+
     }
 
     void HandleConnectError(Exception ex)
@@ -93,6 +94,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Subscription applied!");
         OnSubscriptionApplied?.Invoke();
         ctx.Reducers.EnterGame("Username");
+      
     }
 
     public static bool IsConnected()
@@ -105,18 +107,33 @@ public class GameManager : MonoBehaviour
         Conn.Disconnect();
         Conn = null;
     }
-    private static void SnowballOnDelete(EventContext context, SnowBall deletedValue){
+    public static void GetObstacles()
+    {
+        Debug.Log("Getting obstacles");
+        foreach (var obstacle in Conn.Db.Obstacle.Iter())
+        {
+            Debug.Log($"Obstacle: {obstacle.EntityId}");
+            var entity = Conn.Db.Entity.EntityId.Find(obstacle.EntityId);
+            PrefabManager.SpawnObstacle(obstacle, entity);
+        }
+
+    }
+
+
+    private static void SnowballOnDelete(EventContext context, SnowBall deletedValue)
+    {
         if (Snowballs.Remove(deletedValue.EntityId, out var snowballController))
         {
             GameObject.Destroy(snowballController.gameObject);
         }
         Entities.Remove(deletedValue.EntityId);
     }
-    private static void SnowballOnInsert(EventContext context, SnowBall insertedValue){
+    private static void SnowballOnInsert(EventContext context, SnowBall insertedValue)
+    {
         var player = GetOrCreatePlayer(insertedValue.PlayerId);
         var snowballController = PrefabManager.SpawnSnowball(insertedValue, player);
         Snowballs.Add(insertedValue.EntityId, snowballController);
-         Entities.Add(insertedValue.EntityId, snowballController);
+        Entities.Add(insertedValue.EntityId, snowballController);
     }
 
     private static void PuppetOnInsert(EventContext context, Puppet insertedValue)
@@ -125,14 +142,16 @@ public class GameManager : MonoBehaviour
         var entityController = PrefabManager.SpawnPuppet(insertedValue, player);
         Entities.Add(insertedValue.EntityId, entityController);
     }
-   private static void PuppetOnUpdate(EventContext context, Puppet oldValue, Puppet newValue){
-       //find the puppet in the entities dictionary
-       if(Entities.TryGetValue(newValue.EntityId, out var entityController)){
-           ((PuppetController)entityController).OnEntityUpdated(newValue);
-       }
-    
-       
-   }
+    private static void PuppetOnUpdate(EventContext context, Puppet oldValue, Puppet newValue)
+    {
+        //find the puppet in the entities dictionary
+        if (Entities.TryGetValue(newValue.EntityId, out var entityController))
+        {
+            ((PuppetController)entityController).OnEntityUpdated(newValue);
+        }
+
+
+    }
     private static void EntityOnUpdate(EventContext context, Entity oldEntity, Entity newEntity)
     {
         if (!Entities.TryGetValue(newEntity.EntityId, out var entityController))
@@ -170,12 +189,14 @@ public class GameManager : MonoBehaviour
 
         return playerController;
     }
-    public static void SpawnSnowBall(uint playerId, DbVector2 position){
-       Debug.Log($"SpawnSnowBall: {playerId}, {position}");
-       Conn.Reducers.ThrowSnowBall(playerId, position);
+    public static void SpawnSnowBall(uint playerId, DbVector2 position)
+    {
+        Debug.Log($"SpawnSnowBall: {playerId}, {position}");
+        Conn.Reducers.ThrowSnowBall(playerId, position);
     }
 
-    public static void CraftSnowBall(uint playerId){
-          Conn.Reducers.CraftSnowBall(playerId);
+    public static void CraftSnowBall(uint playerId)
+    {
+        Conn.Reducers.CraftSnowBall(playerId);
     }
 }

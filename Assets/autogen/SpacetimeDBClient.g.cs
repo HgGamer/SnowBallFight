@@ -21,10 +21,12 @@ namespace SpacetimeDB.Types
         public RemoteTables(DbConnection conn)
         {
             AddTable(Config = new(conn));
+            AddTable(DelayedSnowball = new(conn));
             AddTable(Entity = new(conn));
             AddTable(LoggedOutPlayer = new(conn));
             AddTable(MoveAllPlayersTimer = new(conn));
             AddTable(MoveSnowballTimer = new(conn));
+            AddTable(Obstacle = new(conn));
             AddTable(Player = new(conn));
             AddTable(Puppet = new(conn));
             AddTable(Snowball = new(conn));
@@ -442,6 +444,7 @@ namespace SpacetimeDB.Types
                 "EnterGame" => BSATNHelpers.Decode<Reducer.EnterGame>(encodedArgs),
                 "MoveAllPlayers" => BSATNHelpers.Decode<Reducer.MoveAllPlayers>(encodedArgs),
                 "MoveSnowBall" => BSATNHelpers.Decode<Reducer.MoveSnowBall>(encodedArgs),
+                "SpawnDelayedSnowball" => BSATNHelpers.Decode<Reducer.SpawnDelayedSnowball>(encodedArgs),
                 "ThrowSnowBall" => BSATNHelpers.Decode<Reducer.ThrowSnowBall>(encodedArgs),
                 "UpdatePlayerInput" => BSATNHelpers.Decode<Reducer.UpdatePlayerInput>(encodedArgs),
                 var reducer => throw new ArgumentOutOfRangeException("Reducer", $"Unknown reducer {reducer}")
@@ -471,6 +474,7 @@ namespace SpacetimeDB.Types
                 Reducer.EnterGame args => Reducers.InvokeEnterGame(eventContext, args),
                 Reducer.MoveAllPlayers args => Reducers.InvokeMoveAllPlayers(eventContext, args),
                 Reducer.MoveSnowBall args => Reducers.InvokeMoveSnowBall(eventContext, args),
+                Reducer.SpawnDelayedSnowball args => Reducers.InvokeSpawnDelayedSnowball(eventContext, args),
                 Reducer.ThrowSnowBall args => Reducers.InvokeThrowSnowBall(eventContext, args),
                 Reducer.UpdatePlayerInput args => Reducers.InvokeUpdatePlayerInput(eventContext, args),
                 _ => throw new ArgumentOutOfRangeException("Reducer", $"Unknown reducer {reducer}")

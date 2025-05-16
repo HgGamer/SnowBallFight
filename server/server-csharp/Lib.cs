@@ -10,6 +10,12 @@ public static partial class Module
         Craft,
         Standup,
     }
+    
+    [SpacetimeDB.Type]
+    public enum ColliderType {
+        Box,
+        Sphere
+    }
   
 
     // We're using this table as a singleton, so in this table
@@ -31,6 +37,18 @@ public static partial class Module
 
 
     }
+    
+    [Table(Name = "obstacle", Public = true)]
+    public partial struct Obstacle
+    {
+        [PrimaryKey]
+        public uint entity_id;
+        public string obstacle_id;
+        public ColliderType collider_type;
+        public DbVector2 box_size;    // Used when collider_type is Box
+        public float sphere_radius;   // Used when collider_type is Sphere
+    }
+    
     [Table(Name = "logged_out_player")]
     [Table(Name = "player", Public = true)]
     public partial struct Player
@@ -432,5 +450,55 @@ public static partial class Module
         {
             scheduled_at = new ScheduleAt.Interval(TimeSpan.FromMilliseconds(50))
         });
+        
+        // Create obstacles
+        CreateObstacles(ctx);
+    }
+    
+    static void CreateSnowMan(ReducerContext ctx, DbVector2 position, float rotation){
+        // Create a sphere obstacle (rock)
+        var snowmanEntity = ctx.Db.entity.Insert(new Entity
+        {
+            position = position,
+            rotation = rotation
+        });
+        
+        ctx.Db.obstacle.Insert(new Obstacle
+        {
+            entity_id = snowmanEntity.entity_id,
+            obstacle_id = "snowman",
+            collider_type = ColliderType.Sphere,
+            box_size = new DbVector2(0, 0), // Not used for sphere collider
+            sphere_radius = 0.55f
+        });
+
+    }
+
+    private static void CreateObstacles(ReducerContext ctx)
+    {
+        // Create a box ob  stacle (wall)
+        CreateSnowMan(ctx, new DbVector2(0, 0), 0);
+        CreateSnowMan(ctx, new DbVector2(0, 10), 0);
+        CreateSnowMan(ctx, new DbVector2(0, 20), 0);
+        CreateSnowMan(ctx, new DbVector2(0, 30), 0);
+ 
+        
+        
+        
+      //  // Create another box obstacle
+      //  var boxEntity = ctx.Db.entity.Insert(new Entity
+      //  {
+      //      position = new DbVector2(0, 15),
+      //      rotation = 45 // Rotated 45 degrees
+      //  });
+      //  
+      //  ctx.Db.obstacle.Insert(new Obstacle
+      //  {
+      //      entity_id = boxEntity.entity_id,
+      //      obstacle_id = "barricade_1",
+      //      collider_type = ColliderType.Box,
+      //      box_size = new DbVector2(3, 3),
+      //      sphere_radius = 0 // Not used for box collider
+      //  });
     }
 }

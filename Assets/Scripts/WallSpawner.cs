@@ -21,7 +21,7 @@ public class WallSpawner : MonoBehaviour
             
             // Instantiate the wall
             GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-            
+            wall.transform.parent = transform;
             // Make the wall face the center
             wall.transform.LookAt(transform.position);
             // Rotate it 180 degrees to properly face inward

@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
         {
             Local = this;
         }
+        GameManager.GetObstacles();
     }
     private void OnDestroy()
     {

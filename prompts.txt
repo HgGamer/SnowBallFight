@@ -78,4 +78,20 @@ based on the direction offset to the right by 0.5f
 the entity position
 -------
 
+lets create obstacles, we need to define its id (string) collider (box or sphere)  and size (box has vector 2  but sphere has 1) 
+also in the init function add obstacles
+-------
+
+can see this field in unity inspector
+-------
+
+lets create a scriptable object where i can define the "static" prefabs in the following way, each data has a string id and a gameobject reference implement the rightclick menu to create scriptable object and change the dictionarry in the prefamanager to a list of the scriptable object
+-------
+
+use obstaclePrefabs instead of static prefabs
+-------
+
+get obstacles
+-------
+
 
