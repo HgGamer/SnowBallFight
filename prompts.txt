@@ -72,4 +72,10 @@ okay schedule snowball spawning after 1sec instead of instantly calling spawn sn
 okay schedule snowball spawning after 1sec instead of instantly calling spawn snowball, replace the  call
 -------
 
+based on the direction offset to the right by 0.5f
+-------
+
+the entity position
+-------
+
 

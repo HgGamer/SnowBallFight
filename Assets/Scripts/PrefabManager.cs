@@ -38,6 +38,7 @@ public class PrefabManager : MonoBehaviour
 	{
 		var sbc = Instantiate(Instance.SnowBallPrefab);
 		sbc.name = $"SnowballController ";
+		
 		sbc.Spawn(snowball, owner);
 		return sbc;
 	}

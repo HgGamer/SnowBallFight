@@ -5,6 +5,8 @@ using SpacetimeDB.Types;
 using UnityEngine;
 public class PuppetController : EntityController
 {
+
+    public GameObject snowballInHand;
     private Animator animator;
     private PlayerController Owner;
     public Puppet Puppet;
@@ -22,6 +24,7 @@ public class PuppetController : EntityController
 
     public virtual void OnEntityUpdated(Puppet newVal)
 	{
+        snowballInHand.SetActive(newVal.HasSnowball);
 		Debug.Log($"PuppetController: OnEntityUpdated: {newVal.EntityId} , {newVal.PlayerId},  has snowball:  {newVal.HasSnowball}");
         this.Puppet = newVal;
         var states = newVal.CurrentStates;
@@ -29,7 +32,7 @@ public class PuppetController : EntityController
         foreach(var state in states){
             OnStateChanged(state);
         }
-       // OnStateChanged();
+    
     }
     public virtual void OnStateChanged(PlayerActions state){
         switch(state){

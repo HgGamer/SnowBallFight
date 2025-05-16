@@ -10,7 +10,7 @@ public class SnowBallController : EntityController
     public void Spawn(SnowBall SnowBall, PlayerController owner)
     {
         base.Spawn(SnowBall.EntityId);
-		
+		transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
 
         this.Owner = owner;
         //GetComponentInChildren<TMPro.TextMeshProUGUI>().text = owner.Username;
@@ -29,7 +29,7 @@ public class SnowBallController : EntityController
 		LerpStartPosition = transform.position;
 		
 		var newvector = (Vector2)newVal.Position;
-		LerpTargetPosition = new Vector3(newvector.x, 0, newvector.y);
+		LerpTargetPosition = new Vector3(newvector.x, 0.849f, newvector.y);
 		LerpStartRotation = transform.rotation.eulerAngles;
 		LerpTargetRotation = new Vector3(0, newVal.Rotation, 0);
 		

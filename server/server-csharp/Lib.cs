@@ -160,7 +160,7 @@ public static partial class Module
             snowball_entity.position.y = new_pos.y;
             ctx.Db.entity.entity_id.Update(snowball_entity);
             Log.Info($" {snowball.entity_id} at distance {new_pos.Magnitude}");
-            if(new_pos.Magnitude > 100f)
+            if(new_pos.Magnitude > 40f)
             {
                 Log.Info($"Deleting snowball {snowball.entity_id} at distance {new_pos.Magnitude}");
                 ctx.Db.snowball.entity_id.Delete(snowball.entity_id);
@@ -370,11 +370,6 @@ public static partial class Module
 
     public static Entity SpawnSnowBall(ReducerContext ctx, uint player_id, DbVector2 position, SpacetimeDB.Timestamp timestamp)
     {
-        var entity = ctx.Db.entity.Insert(new Entity
-        {
-            position = position,
-        });
-         
         // Find the puppet to get facing direction based on rotation
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
        
@@ -386,10 +381,29 @@ public static partial class Module
         
         // Calculate direction vector from rotation (assuming rotation is in degrees around Y axis)
         float rotationRadians = puppetEntity.rotation * (float)Math.PI / 180f;
+        
+        // Calculate the main direction vector
         DbVector2 direction = new DbVector2(
             (float)Math.Sin(rotationRadians), 
             (float)Math.Cos(rotationRadians)
         );
+        
+        // Calculate the right vector by rotating the direction vector 90 degrees clockwise
+        DbVector2 rightVector = new DbVector2(
+            direction.y,
+            -direction.x
+        );
+        
+        // Add the offset to the right (0.5f of the right vector)
+        var offsetdirection = direction + rightVector * 0.5f;
+        
+        // Offset the spawn position slightly in front of the player
+        DbVector2 offsetPosition = position + offsetdirection.Normalized * 2.0f;
+        
+        var entity = ctx.Db.entity.Insert(new Entity
+        {
+            position = offsetPosition,
+        });
         
         ctx.Db.snowball.Insert(new SnowBall
         {
