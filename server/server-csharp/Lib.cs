@@ -178,14 +178,87 @@ public static partial class Module
             snowball_entity.position.y = new_pos.y;
             ctx.Db.entity.entity_id.Update(snowball_entity);
             Log.Info($" {snowball.entity_id} at distance {new_pos.Magnitude}");
+            
+            // Check if snowball hit a player
+            if(CheckSnowBallPlayerCollision(ctx, snowball_entity.position, 0.2f, snowball.entity_id, snowball.player_id))
+            {
+                Log.Info($"Deleting snowball {snowball.entity_id} after hitting a player");
+                ctx.Db.snowball.entity_id.Delete(snowball.entity_id);
+                ctx.Db.entity.entity_id.Delete(snowball.entity_id);
+                continue;
+            }
+            
+            // Check if snowball is too far away
             if(new_pos.Magnitude > 40f)
             {
                 Log.Info($"Deleting snowball {snowball.entity_id} at distance {new_pos.Magnitude}");
                 ctx.Db.snowball.entity_id.Delete(snowball.entity_id);
                 ctx.Db.entity.entity_id.Delete(snowball.entity_id);
+                continue;
+            }
+            
+            // Check if snowball hit an obstacle
+            if(CheckCollisionWithObstacle(ctx, snowball_entity.position, 0.2f)){
+                Log.Info($"Collision detected for snowball {snowball.entity_id}");
+                ctx.Db.snowball.entity_id.Delete(snowball.entity_id);
+                ctx.Db.entity.entity_id.Delete(snowball.entity_id);
+                continue;
             }
         }
+    }
 
+    public static bool CheckSnowBallPlayerCollision(ReducerContext ctx, DbVector2 position, float radius, uint snowballId, uint throwerId){
+        foreach (var puppet in ctx.Db.puppet.Iter())
+        {
+            // Skip the player who threw the snowball
+            if (puppet.player_id == throwerId) continue;
+            
+            var puppetEntity = ctx.Db.entity.entity_id.Find(puppet.entity_id);
+            if (puppetEntity == null) continue;
+            
+            // Calculate distance between snowball and puppet
+            var diff = position - puppetEntity.Value.position;
+            
+            // Use a fixed collision radius for players (0.5f)
+            if (diff.Magnitude < (0.5f + radius))
+            {
+                // Player was hit, log it
+                Log.Info($"Player {puppet.player_id} was hit by a snowball thrown by player {throwerId}!");
+                
+                // Here you could implement additional hit logic
+                // For example, temporarily freeze player movement
+                var hitPuppet = puppet;
+                hitPuppet.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(1500);
+                ctx.Db.puppet.entity_id.Update(hitPuppet);
+                AddState(ctx, puppet.player_id, PlayerActions.Hit);
+                // Return true to indicate a hit
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool CheckPlayerPlayerCollision(ReducerContext ctx, DbVector2 position, float radius, uint currentPlayerId) {
+        // Check collision with every other player
+        foreach (var otherPuppet in ctx.Db.puppet.Iter()) {
+            // Skip checking against self
+            if (otherPuppet.entity_id == currentPlayerId) continue;
+            
+            var otherEntity = ctx.Db.entity.entity_id.Find(otherPuppet.entity_id);
+            if (otherEntity == null) continue;
+            
+            // Calculate distance between players
+            var diff = position - otherEntity.Value.position;
+            
+            // Use a fixed collision radius for players (0.5f + 0.5f = 1.0f total distance)
+            if (diff.Magnitude < (radius + 0.5f)) {
+                // Log collision
+                Log.Info($"Player collision detected between {currentPlayerId} and {otherPuppet.entity_id}");
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     [Reducer]
@@ -204,6 +277,21 @@ public static partial class Module
                 pup.speed = 0;
                 ctx.Db.puppet.entity_id.Update(pup);
                 continue;
+            }else{
+                Log.Info($"Player {puppet.player_id} is not locked");
+                Log.Info($"Player states: {string.Join(", ", puppet.current_states)}");
+                if(puppet.current_states.Contains(PlayerActions.Hit)){
+                    Log.Info($"Player {puppet.player_id} is standing up");
+                   
+                    var pup = puppet;
+                    pup.current_states.Clear();
+                    pup.speed = 0;
+                    pup.has_snowball = false;
+                  
+                    pup.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(200);
+                    ctx.Db.puppet.entity_id.Update(pup);
+                    AddState(ctx, puppet.player_id, PlayerActions.Standup);
+                }
             }
             var check_entity = ctx.Db.entity.entity_id.Find(puppet.entity_id);
             if (check_entity == null)
@@ -228,22 +316,38 @@ public static partial class Module
                 new_pos = new_pos.Normalized * 40;
             }
             
+            // Check for obstacle collision
+            if(CheckCollisionWithObstacle(ctx, new_pos, 0.5f)){
+               new_pos = puppet_entity.position;
+            }
+            
+            // Check for player-to-player collision
+            if(CheckPlayerPlayerCollision(ctx, new_pos, 0.5f, puppet.entity_id)){
+               new_pos = puppet_entity.position;
+            }
+            
             puppet_entity.position.x = new_pos.x;
             puppet_entity.position.y = new_pos.y;
 
             ctx.Db.entity.entity_id.Update(puppet_entity);
            
         }
+        
+        //this is not good here only remove throw and craft states
+        
         foreach (var puppet in ctx.Db.puppet.Iter())
         {
-            ClearStates(ctx, puppet);
+            // Only clear Throw and Craft states, preserve other states
+            if (puppet.current_states.Contains(PlayerActions.Throw) || puppet.current_states.Contains(PlayerActions.Craft))
+            {
+                var updatedPuppet = puppet;
+                updatedPuppet.current_states.RemoveAll(state => state == PlayerActions.Throw || state == PlayerActions.Craft);
+                ctx.Db.puppet.entity_id.Update(updatedPuppet);
+                Log.Info($"Cleared Throw/Craft states for player {puppet.player_id}");
+            }
         }
       
     }
-
-
-
-
 
 
 
@@ -331,6 +435,7 @@ public static partial class Module
         ctx.Db.puppet.entity_id.Update(puppet);
     }
     static void AddState(ReducerContext ctx,uint player_id, PlayerActions state){
+        Log.Info($"Adding state {state} to player {player_id}");
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
         puppet.current_states.Add(state);
         ctx.Db.puppet.entity_id.Update(puppet);
@@ -373,7 +478,53 @@ public static partial class Module
             AddState(ctx, player_id, PlayerActions.Throw);
         }
     }
-    
+
+    static bool CheckCollisionWithObstacle(ReducerContext ctx, DbVector2 position, float radius){
+        
+        // Check collision with every obstacle
+        foreach (var obstacle in ctx.Db.obstacle.Iter())
+        {
+            var obstacleEntity = ctx.Db.entity.entity_id.Find(obstacle.entity_id);
+            if (obstacleEntity == null) continue;
+            
+            // Calculate distance between entity and obstacle
+            var diff = position - obstacleEntity.Value.position;
+            
+            if (obstacle.collider_type == ColliderType.Sphere)
+            {
+                // For sphere colliders, check if distance is less than the sum of radii
+                if (diff.Magnitude < (obstacle.sphere_radius + radius))
+                {
+                    return true;
+                }
+            }
+            else if (obstacle.collider_type == ColliderType.Box)
+            {
+                // For box colliders, we need to account for rotation
+                // Convert to obstacle's local space
+                float rotationRad = -obstacleEntity.Value.rotation * (float)Math.PI / 180.0f;
+                
+                // Rotate vector (apply inverse rotation to convert to local space)
+                float rotatedX = diff.x * (float)Math.Cos(rotationRad) - diff.y * (float)Math.Sin(rotationRad);
+                float rotatedY = diff.x * (float)Math.Sin(rotationRad) + diff.y * (float)Math.Cos(rotationRad);
+                
+                // Check AABB collision in local space
+                float halfWidth = obstacle.box_size.x / 2.0f;
+                float halfHeight = obstacle.box_size.y / 2.0f;
+                
+                if (Math.Abs(rotatedX) < halfWidth + radius && 
+                    Math.Abs(rotatedY) < halfHeight + radius)
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+
+    }
+     
+
     [Reducer]
     public static void CraftSnowBall(ReducerContext ctx,uint player_id)
     {
@@ -477,7 +628,7 @@ public static partial class Module
     private static void CreateObstacles(ReducerContext ctx)
     {
         // Create a box ob  stacle (wall)
-        CreateSnowMan(ctx, new DbVector2(0, 0), 0);
+        //CreateSnowMan(ctx, new DbVector2(0, 0), 0);
         CreateSnowMan(ctx, new DbVector2(0, 10), 0);
         CreateSnowMan(ctx, new DbVector2(0, 20), 0);
         CreateSnowMan(ctx, new DbVector2(0, 30), 0);

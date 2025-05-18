@@ -114,7 +114,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"Obstacle: {obstacle.EntityId}");
             var entity = Conn.Db.Entity.EntityId.Find(obstacle.EntityId);
-            PrefabManager.SpawnObstacle(obstacle, entity);
+            PrefabManager.Instance.SpawnObstacle(obstacle, entity);
         }
 
     }
@@ -131,7 +131,7 @@ public class GameManager : MonoBehaviour
     private static void SnowballOnInsert(EventContext context, SnowBall insertedValue)
     {
         var player = GetOrCreatePlayer(insertedValue.PlayerId);
-        var snowballController = PrefabManager.SpawnSnowball(insertedValue, player);
+        var snowballController = PrefabManager.Instance.SpawnSnowball(insertedValue, player);
         Snowballs.Add(insertedValue.EntityId, snowballController);
         Entities.Add(insertedValue.EntityId, snowballController);
     }
@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour
     private static void PuppetOnInsert(EventContext context, Puppet insertedValue)
     {
         var player = GetOrCreatePlayer(insertedValue.PlayerId);
-        var entityController = PrefabManager.SpawnPuppet(insertedValue, player);
+        var entityController = PrefabManager.Instance.SpawnPuppet(insertedValue, player);
         Entities.Add(insertedValue.EntityId, entityController);
     }
     private static void PuppetOnUpdate(EventContext context, Puppet oldValue, Puppet newValue)
@@ -183,7 +183,7 @@ public class GameManager : MonoBehaviour
         if (!Players.TryGetValue(playerId, out var playerController))
         {
             var player = Conn.Db.Player.PlayerId.Find(playerId);
-            playerController = PrefabManager.SpawnPlayer(player);
+            playerController = PrefabManager.Instance.SpawnPlayer(player);
             Players.Add(playerId, playerController);
         }
 

@@ -94,4 +94,38 @@ use obstaclePrefabs instead of static prefabs
 get obstacles
 -------
 
+check collision with every obstacle if yes return true else return false
+-------
+
+implement collision check between player and obstacles
+-------
+
+check collision between snowball and the players if a player is hit by a snowball delete the snowball and log the player id
+--------
+
+fix this part based on comment
+--------
+
+implement player to player collision
+--------
+
+obstacle spawning works in editor mode but when i build the game i'm getting this error:
+No prefab found for obstacle id: snowman
+--------
+
+ObstaclePrefabs: 1
+NullReferenceException: Object reference not set to an instance of an object
+  at PrefabManager.Awake () [0x0003b] in <f047df9c71e043d3b5dc3199a282b454>:0 
+--------
+
+why is it null its set in the editor
+--------
+
+also I'M getting this:
+Did you #if UNITY_EDITOR a section of your serialized properties in any of your scripts?
+--------
+
+it seems like unity doesnt like when a scriptable object contains a prefab reference, can we solve it with adressables?
+--------
+
 

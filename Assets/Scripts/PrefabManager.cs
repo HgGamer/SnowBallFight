@@ -4,65 +4,63 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-[CreateAssetMenu(fileName = "New Obstacle Prefab", menuName = "SnowFight/Obstacle Prefab", order = 1)]
-public class ObstaclePrefabData : ScriptableObject
-{
-    public string obstacleId;
-    public GameObject prefab;
-}
+
 
 public class PrefabManager : MonoBehaviour
 {
-    private static PrefabManager Instance;
+    public static PrefabManager Instance;
 
 	public PuppetController PuppetPrefab;
 	
 	public PlayerController PlayerPrefab;
 	public SnowBallController SnowBallPrefab;
 
-	[SerializeField]
-	private List<ObstaclePrefabData> obstaclePrefabs = new List<ObstaclePrefabData>();
 	
-
+	public List<GameObject> obstaclePrefabs = new List<GameObject>();
 	
-    private void Awake()
+    private void Start()
 	{
 		Instance = this;
+		Debug.Log($"ObstaclePrefabs: {obstaclePrefabs.Count}");
+		foreach (var prefab in obstaclePrefabs)
+		{
+			Debug.Log($"ObstaclePrefab: {prefab.transform.name}");
+		}
 	}
 
-    public static PuppetController SpawnPuppet(Puppet puppet, PlayerController owner)
+    public  PuppetController SpawnPuppet(Puppet puppet, PlayerController owner)
 	{
 		Debug.Log($"SpawnPuppet: {puppet.EntityId}");
-		var entityController = Instantiate(Instance.PuppetPrefab);
+		var entityController = Instantiate(PuppetPrefab);
 		entityController.name = $"Puppet - {puppet.EntityId}";
 		entityController.Spawn(puppet, owner);
 		owner.OnPuppetSpawned(entityController);
 		return entityController;
 	}
 
-    public static PlayerController SpawnPlayer(Player player)
+    public  PlayerController SpawnPlayer(Player player)
 	{
 		Debug.Log($"SpawnPlayer: {player.Identity}");
-		var playerController = Instantiate(Instance.PlayerPrefab);
+		var playerController = Instantiate(PlayerPrefab);
 		playerController.name = $"PlayerController - {player.Name}";
 		playerController.Initialize(player);
 		return playerController;
 	}
-	 public static SnowBallController SpawnSnowball(SnowBall snowball, PlayerController owner)
+	 public  SnowBallController SpawnSnowball(SnowBall snowball, PlayerController owner)
 	{
-		var sbc = Instantiate(Instance.SnowBallPrefab);
+		var sbc = Instantiate(SnowBallPrefab);
 		sbc.name = $"SnowballController ";
 		sbc.Spawn(snowball, owner);
 		return sbc;
 	}
 
-	public static void SpawnObstacle(Obstacle obstacle, Entity entity){
+	public  void SpawnObstacle(Obstacle obstacle, Entity entity){
 		
-		var prefabData = Instance.obstaclePrefabs.FirstOrDefault(p => p != null && p.obstacleId == obstacle.ObstacleId);
+		var prefabData = obstaclePrefabs.FirstOrDefault(p => p != null && p.transform.name == obstacle.ObstacleId);
 		
-		if (prefabData != null && prefabData.prefab != null)
+		if (prefabData != null && prefabData != null)
 		{
-		    var obstacleObject = Instantiate(prefabData.prefab);
+		    var obstacleObject = Instantiate(prefabData);
 		    obstacleObject.name = $"Obstacle - {obstacle.EntityId}";
 		    obstacleObject.transform.position = new Vector3(entity.Position.X,0 ,entity.Position.Y);
 		    obstacleObject.transform.localEulerAngles = new Vector3(0, entity.Rotation, 0);
