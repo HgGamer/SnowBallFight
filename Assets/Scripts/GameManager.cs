@@ -19,11 +19,8 @@ public class GameManager : MonoBehaviour
     public static Dictionary<uint, EntityController> Entities = new Dictionary<uint, EntityController>();
     public static Dictionary<uint, PlayerController> Players = new Dictionary<uint, PlayerController>();
     public static Dictionary<uint, SnowBallController> Snowballs = new Dictionary<uint, SnowBallController>();
-    private void Start()
-    {
-        Instance = this;
-        Application.targetFrameRate = 60;
 
+    public void Connect(){
         // In order to build a connection to SpacetimeDB we need to register
         // our callbacks and specify a SpacetimeDB server URI and module name.
         var builder = DbConnection.Builder()
@@ -44,6 +41,13 @@ public class GameManager : MonoBehaviour
         // server.
         Conn = builder.Build();
     }
+    private void Start()
+    {
+        Instance = this;
+        Application.targetFrameRate = 60;
+        Connect();
+      
+    }
 
     // Called when we connect to SpacetimeDB and receive our client identity
     void HandleConnect(DbConnection conn, Identity identity, string token)
@@ -51,9 +55,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("Connected.");
         AuthToken.SaveToken(token);
         LocalIdentity = identity;
-
-
-
 
         conn.Db.Puppet.OnInsert += PuppetOnInsert;
         conn.Db.Puppet.OnUpdate += PuppetOnUpdate;

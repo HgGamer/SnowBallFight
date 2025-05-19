@@ -128,4 +128,7 @@ Did you #if UNITY_EDITOR a section of your serialized properties in any of your 
 it seems like unity doesnt like when a scriptable object contains a prefab reference, can we solve it with adressables?
 --------
 
+can you refactor the lib.cs into multiple files and folders so its more readable?
+-------
+
 

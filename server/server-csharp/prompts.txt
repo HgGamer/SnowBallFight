@@ -1,0 +1,15 @@
+can you refactor the lib.cs into multiple files and folders so its more readable?
+-------
+
+D:\Development\SnowFight\server\server-csharp\Reducers\InitReducer.cs(9,25): error CS0260: Missing partial modifier on declaration of type 'InitReducer'; another partial declaration of this type exists [D:\Development\SnowFight\server\server-csharp\StdbModule.csproj]
+D:\Development\SnowFight\server\server-csharp\Reducers\MovementReducers.cs(11,25): error CS0260: Missing partial modifier on declaration of type 'MovementReducers'; another partial declaration of this type exists [D:\Development\SnowFight\server\server-csharp\StdbModule.csproj]
+D:\Development\SnowFight\server\server-csharp\Reducers\PlayerReducers.cs(8,25): error CS0260: Missing partial modifier on declaration of type 'PlayerReducers'; another partial declaration of this type exists [D:\Development\SnowFight\server\server-csharp\StdbModule.csproj]
+D:\Development\SnowFight\server\server-csharp\Reducers\SnowballReducers.cs(10,25): error CS0260: Missing partial modifier on declaration of type 'SnowballReducers'; another partial declaration of this type exists [D:\Development\SnowFight\server\server-csharp\StdbModule.csproj]
+D:\Development\SnowFight\server\server-csharp\Utils\PlayerStateHelper.cs(8,60): error CS0246: The type or namespace name 'Puppet' could not be found (are you missing a using directive or an assembly reference?)
+------- 
+
+create random position with random range (normalised random vector * random range 10-40) and random rotation
+-------
+
+randomise player spawn location as well
+------- 
