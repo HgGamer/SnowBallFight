@@ -112,9 +112,13 @@ public static partial class Module
     public static void UpdatePlayerInput(ReducerContext ctx, DbVector2 direction, float rotation)
     {
         var player = ctx.Db.player.identity.Find(ctx.Sender) ?? throw new Exception("Player not found");
+
         foreach (var c in ctx.Db.puppet.player_id.Filter(player.player_id))
         {
             var puppet = c;
+            if(puppet.locked_until > ctx.Timestamp){
+                continue;
+            }
             puppet.direction = direction.Normalized;
             puppet.speed = Math.Clamp(direction.Magnitude, 0f, 1f);
             ctx.Db.puppet.entity_id.Update(puppet);
@@ -462,7 +466,9 @@ public static partial class Module
     public static void ThrowSnowBall(ReducerContext ctx, uint player_id, DbVector2 position)
     {
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
-       
+        if(puppet.locked_until > ctx.Timestamp){
+            return;
+        }
         if(puppet.has_snowball){
             // Schedule snowball to spawn after 1 second
             ctx.Db.delayed_snowball.Insert(new DelayedSnowball
@@ -529,6 +535,9 @@ public static partial class Module
     public static void CraftSnowBall(ReducerContext ctx,uint player_id)
     {
         var puppet = ctx.Db.puppet.player_id.Filter(player_id).FirstOrDefault();
+        if(puppet.locked_until > ctx.Timestamp){
+            return;
+        }
         puppet.has_snowball = true;
         puppet.locked_until = ctx.Timestamp + TimeSpan.FromMilliseconds(1000);
         ctx.Db.puppet.entity_id.Update(puppet);
