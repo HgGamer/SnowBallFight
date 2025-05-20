@@ -4,11 +4,13 @@ using SpacetimeDB;
 using SpacetimeDB.Types;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using PimDeWitte.UnityMainThreadDispatcher;
 using System.Collections;
-public class PlayerController : MonoBehaviour
-{
+using UnityEngine.InputSystem;
 
+public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions 
+{
     const int SEND_UPDATES_PER_SEC = 20;
     const float SEND_UPDATES_FREQUENCY = 1f / SEND_UPDATES_PER_SEC;
 
@@ -22,6 +24,32 @@ public class PlayerController : MonoBehaviour
     public int NumberOfOwnedPuppet => OwnedPuppets.Count;
     public bool IsLocalPlayer => this == Local;
 
+    // Controller settings
+    [Header("Controller Settings")]
+    public float rotationSpeed = 120f;
+    public float rightStickDeadzone = 0.2f;
+    
+    // Input System
+    private PlayerInputActions playerInputActions;
+    private Vector2 moveInput;
+    private Vector2 lookInput;
+    private bool isRightMouseButtonPressed = false;
+
+    private void Awake()
+    {
+        playerInputActions = new PlayerInputActions();
+        playerInputActions.Player.SetCallbacks(this);
+    }
+
+    private void OnEnable()
+    {
+        playerInputActions.Enable();
+    }
+
+    private void OnDisable()
+    {
+        playerInputActions.Disable();
+    }
 
     public void Initialize(Player player)
     {
@@ -52,9 +80,8 @@ public class PlayerController : MonoBehaviour
         {
             GameObject.Find("CinemachineCamera").GetComponent<CinemachineCamera>().Target.TrackingTarget = OwnedPuppets[0].gameObject.transform;
         }
-      
-
     }
+    
     public void OnPuppetDeleted(PuppetController deletedPuppet)
     {
         // This means we got eaten
@@ -73,58 +100,110 @@ public class PlayerController : MonoBehaviour
 
         //GUI.Label(new Rect(0, 0, 100, 50), $"Total Mass: {TotalMass()}");
     }
-    // Update is called once per frame
     
+    // InputSystem callback for movement
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        if (context.performed || context.canceled)
+        {
+            moveInput = context.ReadValue<Vector2>();
+            // Store raw input without zeroing it out each frame
+            LockInputPosition = moveInput;
+        }
+    }
+
+    // InputSystem callback for looking/rotation
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        lookInput = context.ReadValue<Vector2>();
+    }
+
+    // InputSystem callback for fire button
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        if (context.performed && IsLocalPlayer && NumberOfOwnedPuppet > 0)
+        {
+            HandleFireAction();
+        }
+    }
+    
+    void HandleFireAction()
+    {
+        if (!OwnedPuppets[0].Puppet.HasSnowball)
+        {
+            Debug.Log($"PlayerController: Fire button pressed: {PlayerId}, Crafting snowball");
+            GameManager.CraftSnowBall(PlayerId);
+        }
+        else
+        {
+            var from = OwnedPuppets[0].transform.position;
+            Debug.Log($"PlayerController: Fire button pressed: {PlayerId}, Spawning snowball from {from}");
+            GameManager.SpawnSnowBall(PlayerId, new Vector2(from.x, from.z));
+        }
+    }
+
+    // Update is called once per frame
     void Update()
     {
         if (!IsLocalPlayer || NumberOfOwnedPuppet == 0)
         {
             return;
         }
-      
-        if (Input.GetMouseButton(1)) // Right mouse button
+        
+        // Check for right mouse button separately since it's used for camera control
+        if (Mouse.current != null)
         {
-            float mouseX = Input.GetAxis("Mouse X");
-            Rotate(mouseX);
+            isRightMouseButtonPressed = Mouse.current.rightButton.isPressed;
         }
-        if (Input.GetMouseButtonDown(0)) // Left mouse button
-        {
-            if(!OwnedPuppets[0].Puppet.HasSnowball){
-                Debug.Log($"PlayerController: OnMouseDown: {PlayerId} , Crafting snowball");
-                GameManager.CraftSnowBall(PlayerId);
-            }else{
-                var from =  OwnedPuppets[0].transform.position;
-                Debug.Log($"PlayerController: OnMouseDown: {PlayerId} , Spawning snowball from {from}");
-                GameManager.SpawnSnowBall(PlayerId, new Vector2(from.x, from.z));
-            }
-           
-        }
-        LockInputPosition = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        
+        HandleRotation();
 
         // Throttled input requests
         if (Time.time - LastMovementSendTimestamp >= SEND_UPDATES_FREQUENCY)
         {
             LastMovementSendTimestamp = Time.time;
-            var mousePosition = LockInputPosition;
-            var direction = GetMoveDirection(mousePosition);
+            // Use moveInput directly to avoid losing diagonal input between frames
+            var direction = GetMoveDirection(moveInput); 
             GameManager.Conn.Reducers.UpdatePlayerInput(direction, transform.rotation.eulerAngles.y);
-            LockInputPosition = new Vector2(0, 0);
+            // Don't zero out LockInputPosition here to maintain continuous movement
+        }
+    }
+
+    void HandleRotation()
+    {
+        // Handle mouse rotation when right button is held
+        if (isRightMouseButtonPressed && lookInput.x != 0)
+        {
+            // For mouse, use delta (lookInput) directly
+            Rotate(lookInput.x * 3f);
+        }
+        // Handle controller right stick rotation
+        else if (!isRightMouseButtonPressed && Mathf.Abs(lookInput.x) > rightStickDeadzone)
+        {
+            // For controller, apply rotation scaled by delta time
+            Rotate(lookInput.x * rotationSpeed * Time.deltaTime);
         }
     }
 
     Vector2 GetMoveDirection(Vector2 direction)
     {
-
-        Vector3 move = new Vector3(direction.x, 0, direction.y).normalized;
-        move = transform.TransformDirection(move);
-        // Return the XZ components as a Vector2 (worldspace movement)
-        return new Vector2(move.x, move.z);
+        // Only normalize if the magnitude is > 0 to prevent NaN values
+        if (direction.sqrMagnitude > 0)
+        {
+            // Convert to 3D space and keep normalized
+            Vector3 move = new Vector3(direction.x, 0, direction.y);
+            // Normalize only if magnitude > 1 to preserve small inputs
+            if (move.magnitude > 1f)
+                move.Normalize();
+            move = transform.TransformDirection(move);
+            // Return the XZ components as a Vector2 (worldspace movement)
+            return new Vector2(move.x, move.z);
+        }
+        return Vector2.zero;
     }
 
-    void Rotate(float mouseX)
+    void Rotate(float rotationAmount)
     {
-        float rotationSpeed = 3f;
-        // Rotate player (and camera if camera is child)
-        transform.Rotate(0, mouseX * rotationSpeed, 0);
+        transform.Rotate(0, rotationAmount, 0);
     }
 }

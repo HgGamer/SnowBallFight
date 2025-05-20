@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using SpacetimeDB;
 using SpacetimeDB.Types;
@@ -10,6 +11,9 @@ public class PuppetController : EntityController
     private Animator animator;
     private PlayerController Owner;
     public Puppet Puppet;
+    public GameObject yeti;
+    public GameObject hole;
+
     void Awake(){
         animator = GetComponent<Animator>();
     }
@@ -34,6 +38,12 @@ public class PuppetController : EntityController
         }
     
     }
+    IEnumerator ShowYeti(){
+        yield return new WaitForSeconds(1f);
+        Instantiate(hole, transform.position, Quaternion.identity);
+        Instantiate(yeti, transform.position, Quaternion.identity);
+        
+    }
     public virtual void OnStateChanged(PlayerActions state){
         switch(state){
             case PlayerActions.Throw:
@@ -43,6 +53,7 @@ public class PuppetController : EntityController
             case PlayerActions.Hit:
                 Debug.Log($"PuppetController: OnStateChanged: {EntityId} , {state}");
                 animator.SetTrigger("Hit");
+                ShowYeti();
                 break;
             case PlayerActions.Craft:
                 Debug.Log($"PuppetController: OnStateChanged: {EntityId} , {state}");
@@ -61,5 +72,5 @@ public class PuppetController : EntityController
         Owner.OnPuppetDeleted(this);
 	}
 
-
+ 
 }
