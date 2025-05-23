@@ -5,7 +5,9 @@
 
 SnowFight is a multiplayer winter-themed battle game where players engage in epic snowball fights in a charming snow-covered environment. 
 
-![SnowFight Gameplay](https://github.com/HgGamer/SnowBallFight/raw/refs/heads/main/video.mp4)
+[![]([video.mp4](https://github.com/HgGamer/SnowBallFight/raw/refs/heads/main/video.mp4))
+https://github.com/HgGamer/SnowBallFight/raw/refs/heads/main/video.mp4](https://raw.githubusercontent.com/HgGamer/SnowBallFight/refs/heads/main/video.mp4)
+https://raw.githubusercontent.com/HgGamer/SnowBallFight/refs/heads/main/video.mp4
 
 ## Features
 
@@ -70,6 +72,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Credits
 
 - SimpleToon shader effects
-
 
 
