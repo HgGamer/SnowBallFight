@@ -48,6 +48,7 @@ public class EntityController  : MonoBehaviour
 
 	public virtual void OnDelete(EventContext context)
 	{
+		Debug.Log("OnDelete entity");
 		Destroy(gameObject);
 	}
 

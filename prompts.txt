@@ -131,4 +131,31 @@ it seems like unity doesnt like when a scriptable object contains a prefab refer
 can you refactor the lib.cs into multiple files and folders so its more readable?
 -------
 
+increase the size until its 3.2f
+-------
+
+on Y axis alway face the camera
+-------
+
+only rotate on Y axis keep the other euler angles
+-------
+
+why is the z changing?
+-------
+
+only copy camera Y rotation to object Y so just simply match it
+-------
+
+create an about.md where you create a detailed documentation of the project includint the server and the client
+-------
+
+can you create a more casual version for project managers?
+-------
+
+check if input is controller and not mouse
+-------
+
+add random pitch
+-------
+
 

@@ -6,7 +6,7 @@ using SpacetimeDB.Types;
 using UnityEngine;
 public class GameManager : MonoBehaviour
 {
-    const string SERVER_URL = "http://127.0.0.1:3000";
+    const string SERVER_URL = "http://catfood.li:3000";
     const string MODULE_NAME = "snowfight";
 
     public static event Action OnConnected;
@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
     {
         if (Snowballs.Remove(deletedValue.EntityId, out var snowballController))
         {
-            GameObject.Destroy(snowballController.gameObject);
+            snowballController.OnDelete(context);
         }
         Entities.Remove(deletedValue.EntityId);
     }

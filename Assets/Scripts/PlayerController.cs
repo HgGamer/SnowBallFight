@@ -34,11 +34,32 @@ public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions
     private Vector2 moveInput;
     private Vector2 lookInput;
     private bool isRightMouseButtonPressed = false;
+    
+    // Track last used device
+    private bool isUsingGamepad = false;
 
     private void Awake()
     {
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.SetCallbacks(this);
+        
+        // Subscribe to device change events
+        InputSystem.onActionChange += OnInputDeviceChanged;
+    }
+    
+    private void OnInputDeviceChanged(object obj, InputActionChange change)
+    {
+        // Check if the action is being performed (triggered)
+        if (change == InputActionChange.ActionPerformed)
+        {
+            InputAction action = obj as InputAction;
+            if (action != null && action.activeControl != null)
+            {
+                // Check if the active device is a gamepad
+                isUsingGamepad = action.activeControl.device is Gamepad;
+//                Debug.Log($"Input device changed. Using gamepad: {isUsingGamepad}");
+            }
+        }
     }
 
     private void OnEnable()
@@ -49,6 +70,8 @@ public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions
     private void OnDisable()
     {
         playerInputActions.Disable();
+        // Unsubscribe from device change events to prevent memory leaks
+        InputSystem.onActionChange -= OnInputDeviceChanged;
     }
 
     public void Initialize(Player player)
@@ -109,6 +132,12 @@ public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions
             moveInput = context.ReadValue<Vector2>();
             // Store raw input without zeroing it out each frame
             LockInputPosition = moveInput;
+            
+            // Update the device type when this input is received
+            if (context.control != null)
+            {
+                isUsingGamepad = context.control.device is Gamepad;
+            }
         }
     }
 
@@ -116,6 +145,12 @@ public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions
     public void OnLook(InputAction.CallbackContext context)
     {
         lookInput = context.ReadValue<Vector2>();
+        
+        // Update the device type when this input is received
+        if (context.control != null)
+        {
+            isUsingGamepad = context.control.device is Gamepad;
+        }
     }
 
     // InputSystem callback for fire button
@@ -150,8 +185,8 @@ public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions
             return;
         }
         
-        // Check for right mouse button separately since it's used for camera control
-        if (Mouse.current != null)
+        // Only check for mouse button if we're not using a gamepad
+        if (!isUsingGamepad && Mouse.current != null)
         {
             isRightMouseButtonPressed = Mouse.current.rightButton.isPressed;
         }
@@ -171,17 +206,21 @@ public class PlayerController : MonoBehaviour, PlayerInputActions.IPlayerActions
 
     void HandleRotation()
     {
-        // Handle mouse rotation when right button is held
-        if (isRightMouseButtonPressed && lookInput.x != 0)
+        if (isUsingGamepad)
         {
-            // For mouse, use delta (lookInput) directly
-            Rotate(lookInput.x * 3f);
+            // We're using a gamepad - use right stick for rotation with deadzone
+            if (Mathf.Abs(lookInput.x) > rightStickDeadzone)
+            {
+                Rotate(lookInput.x * rotationSpeed * Time.deltaTime);
+            }
         }
-        // Handle controller right stick rotation
-        else if (!isRightMouseButtonPressed && Mathf.Abs(lookInput.x) > rightStickDeadzone)
+        else
         {
-            // For controller, apply rotation scaled by delta time
-            Rotate(lookInput.x * rotationSpeed * Time.deltaTime);
+            // We're using mouse input
+            if (isRightMouseButtonPressed && lookInput.x != 0)
+            {
+                Rotate(lookInput.x * rotationSpeed * Time.deltaTime);
+            }
         }
     }
 

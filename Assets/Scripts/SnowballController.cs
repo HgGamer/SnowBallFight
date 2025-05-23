@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using SpacetimeDB;
 using SpacetimeDB.Types;
@@ -6,7 +7,7 @@ using UnityEngine;
 public class SnowBallController : EntityController
 {
    private PlayerController Owner;
-
+	public AudioSource hitSound;
     public void Spawn(SnowBall SnowBall, PlayerController owner)
     {
         base.Spawn(SnowBall.EntityId);
@@ -15,11 +16,19 @@ public class SnowBallController : EntityController
         this.Owner = owner;
         //GetComponentInChildren<TMPro.TextMeshProUGUI>().text = owner.Username;
     }
-   
+    IEnumerator OnHitSomething(){
+		hitSound.Play();
+		
+		transform.GetChild(0).gameObject.SetActive(false);
+		GetComponent<MeshRenderer>().enabled = false;
+		yield return new WaitForSeconds(hitSound.clip.length);
+		
+		base.OnDelete(null);
+	}
 	public override void OnDelete(EventContext context)
-	{
-		base.OnDelete(context);
-       
+	{	
+	
+		StartCoroutine(OnHitSomething());
 	}
 
     public override void OnEntityUpdated(Entity newVal)
