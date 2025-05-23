@@ -6,7 +6,7 @@
 SnowFight is a multiplayer winter-themed battle game where players engage in epic snowball fights in a charming snow-covered environment. 
 
 
-https://raw.githubusercontent.com/HgGamer/SnowBallFight/refs/heads/main/image.png
+ ![Snowfight screenshot](image.png)
 
 ## Features
 
