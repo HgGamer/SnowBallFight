@@ -1,0 +1,4 @@
+can you write the project readme.md ?  write how to contribute, on the start add a video about the project and a short summary
+-------
+change it so the video is visible on github readme
+------- 
