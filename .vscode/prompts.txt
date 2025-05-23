@@ -1,0 +1,164 @@
+implement a camera movement where the camera follows the player (transform) keep the rotation of the camera
+-------
+
+implement a basic WASD movement, dont need to use gravity, separate the input and movement, movement should be a function with Vector2 paramenter and move based on that
+-------
+
+add player and camera rotation when right mouse button is pressed and we move the mouse horisontally rorate camera  and player on Y axis
+-------
+
+only the player moves, rotate the camera as well
+-------
+
+rotate the camera based on player faceing direction do not user the mouse input
+-------
+
+movement should be related to facing direction
+-------
+
+\Lib.cs(126,12): error CS1061: 'Local' does not contain a definition for 'Puppet' and no accessible extension method 'Puppet' accepting a first argument of type 'Local' could be found (are
+ you missing a using directive or an assembly reference?)
+------- 
+For the code present, we get this error:
+```
+The type or namespace name 'CinemachineCamera' could not be found (are you missing a using directive or an assembly reference?)
+```
+How can I resolve this? If you propose a fix, please make it concise.
+-------
+call this but on main thread
+-------
+can i call it in the next frame?
+-------
+
+Move function should return the move vector in worldspace
+-------
+
+transform.position assign attempt for 'Puppet - 1' is not valid. Input position is { NaN, NaN, 0.000000 }.
+-------
+
+the lerp is good but when it changes from 360 it rotates in the wrong direction
+-------
+
+camera movement should be lerped as well
+-------
+
+create snowball
+-------
+
+why is my snowball is not moving?
+-------
+
+can you explain this part?
+-------
+
+calculate direction vector from  player.rotation;
+-------
+
+calculate distance from 0,0 and if its larger than 100 delete entinty
+-------
+
+if player next position magnitude would be over 20 round it down so its under 20
+-------
+
+spawn wall prefabs from center a given distance , and given number of them equaly arranged around the circle each faceing the circle center
+-------
+
+implement 
+-------
+
+okay schedule snowball spawning after 1sec instead of instantly calling spawn snowball, replace the    Task.Delay call with itu
+-------
+
+okay schedule snowball spawning after 1sec instead of instantly calling spawn snowball, replace the  call
+-------
+
+based on the direction offset to the right by 0.5f
+-------
+
+the entity position
+-------
+
+lets create obstacles, we need to define its id (string) collider (box or sphere)  and size (box has vector 2  but sphere has 1) 
+also in the init function add obstacles
+-------
+
+can see this field in unity inspector
+-------
+
+lets create a scriptable object where i can define the "static" prefabs in the following way, each data has a string id and a gameobject reference implement the rightclick menu to create scriptable object and change the dictionarry in the prefamanager to a list of the scriptable object
+-------
+
+use obstaclePrefabs instead of static prefabs
+-------
+
+get obstacles
+-------
+
+check collision with every obstacle if yes return true else return false
+-------
+
+implement collision check between player and obstacles
+-------
+
+check collision between snowball and the players if a player is hit by a snowball delete the snowball and log the player id
+--------
+
+fix this part based on comment
+--------
+
+implement player to player collision
+--------
+
+obstacle spawning works in editor mode but when i build the game i'm getting this error:
+No prefab found for obstacle id: snowman
+--------
+
+ObstaclePrefabs: 1
+NullReferenceException: Object reference not set to an instance of an object
+  at PrefabManager.Awake () [0x0003b] in <f047df9c71e043d3b5dc3199a282b454>:0 
+--------
+
+why is it null its set in the editor
+--------
+
+also I'M getting this:
+Did you #if UNITY_EDITOR a section of your serialized properties in any of your scripts?
+--------
+
+it seems like unity doesnt like when a scriptable object contains a prefab reference, can we solve it with adressables?
+--------
+
+can you refactor the lib.cs into multiple files and folders so its more readable?
+-------
+
+increase the size until its 3.2f
+-------
+
+on Y axis alway face the camera
+-------
+
+only rotate on Y axis keep the other euler angles
+-------
+
+why is the z changing?
+-------
+
+only copy camera Y rotation to object Y so just simply match it
+-------
+
+create an about.md where you create a detailed documentation of the project includint the server and the client
+-------
+
+can you create a more casual version for project managers?
+-------
+
+check if input is controller and not mouse
+-------
+
+add random pitch
+-------
+
+can you write the project readme.md ?  write how to contribute, on the start add a video about the project and a short summary
+-------
+
+
