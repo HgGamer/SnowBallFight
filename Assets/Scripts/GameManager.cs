@@ -6,7 +6,7 @@ using SpacetimeDB.Types;
 using UnityEngine;
 public class GameManager : MonoBehaviour
 {
-    const string SERVER_URL = "http://catfood.li:3000";
+    const string SERVER_URL = "http://localhost:3000";
     const string MODULE_NAME = "snowfight";
 
     public static event Action OnConnected;
