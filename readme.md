@@ -19,6 +19,7 @@ SnowFight is a multiplayer winter-themed battle game where players engage in epi
 ### Prerequisites
 
 - Unity 6 or newer
+- [SpacetimeDB](https://spacetimedb.com/home)
 
 ### Installation
 
